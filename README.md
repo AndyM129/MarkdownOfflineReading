@@ -12,6 +12,16 @@
 2. 指定文件夹，将其内部所有Markdown文档离线阅读
 3. 支持源文件备份，如 `file.md` -> `file.ori.md`
 
+
+
+## Installation
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/AndyM129/MarkdownOfflineReading/master/install.sh)"
+```
+
+
+
 ## Example
 
 ```
