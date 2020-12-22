@@ -107,11 +107,11 @@ function offline_markdown_file($markdown_file) {
   $markdown_file_content = file_get_contents($markdown_file);
 
   // 找出所有 ![title](path) 图片标签 
-  $markdown_img_pattern = '/\!\[[^\]]+\]\(http[^\)]+\)/';
+  $markdown_img_pattern = '/\!\[[^\]]*\]\(http[^\)]+\)/';
   preg_match_all($markdown_img_pattern, $markdown_file_content, $markdown_img_tags);
   $markdown_img_tags = $markdown_img_tags[0]; // 二维数组 降为 一维数组
   $markdown_img_tags = array_unique($markdown_img_tags); // 数组去重
-  //print_r($markdown_img_tags);
+  // print_r($markdown_img_tags);
   if (empty($markdown_img_tags)) {
     echo ("✅ Markdown文件离线结束(无网络图片需要离线)：$markdown_file\n");
     return;
@@ -123,7 +123,7 @@ function offline_markdown_file($markdown_file) {
     // echo($markdown_img_tag."\n");
 
     // 提取 path
-    $img_title_pattern = '/\!\[[^\]]+\]/';
+    $img_title_pattern = '/\!\[[^\]]*\]/';
     $markdown_img_path = preg_replace($img_title_pattern, '', $markdown_img_tag);
     // print_r($markdown_img_path."\n");
 
@@ -131,11 +131,13 @@ function offline_markdown_file($markdown_file) {
     $img_url_pattern = '/[a-zA-z]+:[^\s\)]*/';
     preg_match($img_url_pattern, $markdown_img_path, $markdown_img_url);
     $markdown_img_url = $markdown_img_url[0];
+    // print_r($markdown_img_url."\n");
 
     // 提取URL，可能带有参数
     $img_url_pattern_with_params = '/[a-zA-z]+:[^\)]*/'; //'/[a-zA-z]+:[^\s\)]*/';
     preg_match($img_url_pattern_with_params, $markdown_img_path, $markdown_img_url_with_params);
     $markdown_img_url_with_params = $markdown_img_url_with_params[0];
+    // print_r($markdown_img_url_with_params."\n");
 
     // 下载图片
     $markdown_img_url_cache_key = md5($markdown_img_url); //$index; //urlencode($markdown_img_url);
@@ -162,17 +164,21 @@ function offline_markdown_file($markdown_file) {
 
 // 下载图片
 function download_image($url, $file) {
-    $state = @file_get_contents($url,0,null,0,1);//获取网络资源的字符内容
-    if($state) {
-        ob_start();//打开输出
-        readfile($url);//输出图片文件
-        $img = ob_get_contents();//得到浏览器输出
-        ob_end_clean();//清除输出并关闭
-        $fp2 = @fopen($file, "a");
-        fwrite($fp2, $img);//向当前目录写入图片文件，并重新命名
-        fclose($fp2);
-        return true;
-    } else {
-        return false;
-    }
+  if (empty($url)) {
+    return false;
+  }
+
+  $state = @file_get_contents($url,0,null,0,1);//获取网络资源的字符内容
+  if($state) {
+    ob_start();//打开输出
+    readfile($url);//输出图片文件
+    $img = ob_get_contents();//得到浏览器输出
+    ob_end_clean();//清除输出并关闭
+    $fp2 = @fopen($file, "a");
+    fwrite($fp2, $img);//向当前目录写入图片文件，并重新命名
+    fclose($fp2);
+    return true;
+  } else {
+    return false;
+  }
 }
